@@ -8,6 +8,34 @@
 #define LATCH_PIN PD6 // STC
 #define CLOCK_PIN PD7 // SHC
 
+#define boton1 (PINC >> PC2 & 1)
+uint8_t flag_bot1, e_a_b1;
+void anti_reb1(void)
+{
+  static uint8_t cont_bot1 = 0;
+  if (boton1 == 0)
+  {
+    if (cont_bot1 < 200)
+    {
+      cont_bot1++;
+    }
+  }
+  else
+  {
+    cont_bot1 = 0;
+  }
+  if (cont_bot1 > 50)
+  {
+    flag_bot1 = 1;
+    set_bit(PORTB, PB5);
+  }
+  else
+  {
+    clear_bit(PORTB, PB5);
+    flag_bot1 = 0;
+  }
+}
+
 /* Esta funcion decrementa un numero entre 0 y 20.00 en formato
 de reloj, envia este numero descompuesto a los 4 displays */
 uint16_t decrementar(uint16_t tiempo)
@@ -180,6 +208,9 @@ void initInterrupts(void)
 /* Esta funcion configura In&Out*/
 void config_IO(void)
 {
+  clear_bit(DDRC, PC2); // boton 1
+  set_bit(PORTC, PC2);
+
   clear_bit(DDRD, PB4);
   set_bit(PORTD, PD4);
   set_bit(DDRD, PD5); // DATA
