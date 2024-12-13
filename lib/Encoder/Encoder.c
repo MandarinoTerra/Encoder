@@ -4,54 +4,124 @@
 #define set_bit(reg, bit) reg |= (1 << bit)
 #define clear_bit(reg, bit) reg &= ~(1 << bit)
 
-#define data_pin set_bit(DDRD, PD5); // DATA
-#define latch_pin set_bit(DDRD, PD6) ;         // STC
-#define clk_pin set_bit(DDRD, PD7);  // SHC
+#define DATA_PIN_ PD5 // DATA
+#define LATCH_PIN PD6 // STC
+#define CLOCK_PIN PD7 // SHC
+
+/* Esta funcion decrementa un numero entre 0 y 20.00 en formato
+de reloj, envia este numero descompuesto a los 4 displays */
+uint16_t decrementar(uint16_t tiempo)
+{
+  uint8_t segundos;
+  uint8_t minutos;
+  segundos = tiempo % 100;
+  minutos = tiempo / 100;
+  if (segundos >= 1)
+  {
+    segundos--;
+  }
+  else
+  {
+    if (minutos >= 1)
+    {
+      minutos--;
+      segundos = 59;
+    }
+  }
+  return (minutos * 100) + segundos;
+}
+/* Esta funcion recibe el angulo de un encoder para setear un tiempo en un display cuadruple,
+ retorna el mismo angle para igualarlo y evitar usar punteros de mierda */
+int16_t reloja(int16_t angle)
+{
+  static uint8_t mins = 0;
+  if (mins < 20)
+  {
+    if (angle > 59)
+    {
+      mins++;
+      angle = 0;
+    }
+    if (angle < 0)
+    {
+      if (mins > 0)
+      {
+        angle = 59;
+        mins--;
+      }
+      else
+      {
+        angle = 59;
+        mins = 19;
+      }
+    }
+  }
+  else
+  {
+    mins = 0;
+    angle = 0;
+  }
+  descomponer((mins * 100) + angle);
+  return (mins * 100) + angle;
+}
+/* Esta funcion recibe un  uint8_t y lo manda al registro 74hc595*/
 void send_reg(uint8_t data)
 {
-  // Comienza desde el bit más significativo
   for (uint8_t i = 0; i < 8; i++)
   {
-    // Extrae el bit en la posición correspondiente
-    if ((data & (1ULL << (7 - i))) != 0) // Cambiado para obtener el bit más significativo primero
-      set_bit(PORTB, data_pin);
+    // Enviar el bit más bajo de 'data'
+    if (data & (1 << i))
+      PORTD |= (1 << DATA_PIN_); // Si el bit está a 1, ponemos el pin DATA en alto
     else
-      clear_bit(PORTB, data_pin);
-
-    // Genera un pulso de reloj
-    set_bit(PORTB, clk_pin);
-    //_delay_ms(250);
-    clear_bit(PORTB, clk_pin);
-    //_delay_ms(250);
+      PORTD &= ~(1 << DATA_PIN_); // Si el bit está a 0, ponemos el pin DATA en bajo
+    // Pulsar el reloj para mover el dato al registro de desplazamiento
+    PORTD |= (1 << CLOCK_PIN);  // Reloj en alto
+    PORTD &= ~(1 << CLOCK_PIN); // Reloj en bajo
   }
-  set_bit(PORTB, clk_pin);
-  //_delay_ms(250);
-  clear_bit(PORTB, clk_pin);
+  // Después de enviar todos los bits, ponemos el latch en alto para actualizar las salidas
+  PORTD |= (1 << LATCH_PIN);  // Latch en alto
+  PORTD &= ~(1 << LATCH_PIN); // Latch en bajo
 }
 /* Esta funcion recibe un que display quiero prender y que numero mandarle*/
-void Transistores(uint16_t display, uint16_t num)
+void Transistores(uint8_t display, uint8_t num)
 {
-  /*
-  set_bit(DDRB, PB0); // uni
-  set_bit(DDRB, PB1); // dece
-  set_bit(DDRB, PB2); // cente
-  set_bit(DDRB, PB3); // Mile
-  */
-  clear_bit(PORTB, PB0);
-  clear_bit(PORTB, PB1);
-  clear_bit(PORTB, PB2);
-  clear_bit(PORTB, PB3);
-
-  // wels
+  static uint8_t farfadox[10] = {
+      0b11111100, // 0'
+      0b01100000, // 1
+      0b11011010, // 2
+      0b11110010, // 3
+      0b01100110, // 4
+      0b10110110, // 5
+      0b10111110, // 6
+      0b11100000, // 7
+      0b11111110, // 8
+      0b11110110  // 9
+  };
+  set_bit(PORTB, PB0);
+  set_bit(PORTB, PB1);
+  set_bit(PORTB, PB2);
+  set_bit(PORTB, PB3);
 
   if (display == 1)
-    set_bit(PORTB, PB0);
+  {
+    send_reg(farfadox[num]);
+    clear_bit(PORTB, PB0);
+  }
   if (display == 2)
-    set_bit(PORTB, PB1);
+  {
+    send_reg(farfadox[num]);
+    clear_bit(PORTB, PB1);
+  }
   if (display == 3)
-    set_bit(PORTB, PB2);
+  {
+    send_reg(1 + farfadox[num]);
+    clear_bit(PORTB, PB2);
+  }
   if (display == 4)
-    set_bit(PORTB, PB3);
+  {
+    send_reg(farfadox[num]);
+    clear_bit(PORTB, PB3);
+  }
 }
 /* Esta funcion recibe un numero descompuesto y los manda a el display*/
 void multiplexado(uint8_t uni, uint8_t dec, uint8_t cent, uint8_t mil)
