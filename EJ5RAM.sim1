@@ -1,0 +1,65 @@
+<circuit version="1.1.0-SR0" rev="1917" stepSize="1000000" stepsPS="380000" NLsteps="100000" reaStep="1000000" animate="1" >
+
+<item itemtype="Subcircuit" CircId="Uno-2" mainComp="false" Show_id="true" Show_Val="false" Pos="-304,-196" rotation="0" hflip="1" vflip="1" label="Arduino Uno-9" idLabPos="50,235" labelrot="0" valLabPos="0,0" valLabRot="0" Logic_Symbol="false">
+<mainCompProps MainCompId="mega328-109" Frequency="16 MHz" Program="../../../Documents/PlatformIO/Projects/Encoder/.pio/build/uno/firmware.hex" Auto_Load="false" saveEepr="true" SerialMon="-1" />
+</item>
+
+<item itemtype="KY040" CircId="KY040-12" mainComp="false" Show_id="false" Show_Val="false" Pos="-384,-204" rotation="180" hflip="-1" vflip="-1" label="KY040-12" idLabPos="-34,20" labelrot="-90" valLabPos="-16,20" valLabRot="0" Steps="20" />
+
+<item itemtype="Seven Segment" CircId="Seven Segment-14" mainComp="false" Show_id="false" Show_Val="false" Pos="-440,-68" rotation="0" hflip="1" vflip="1" label="Seven Segment-14" idLabPos="20,-44" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="Yellow" NumDisplays="4" Vertical_Pins="false" CommonCathode="true" Threshold="2.4 V" MaxCurrent="20 mA" Resistance="100 Ω" />
+
+<item itemtype="Subcircuit" CircId="74HC595-16" mainComp="false" Show_id="true" Show_Val="false" Pos="-516,-108" rotation="0" hflip="1" vflip="1" label="74HC595-16" idLabPos="-9.31277,-16.4986" labelrot="0" valLabPos="-16,20" valLabRot="0" Input_High_V="2.5 V" Input_Low_V="2.5 V" Input_Imped="1e+09 Ω" Out_High_V="5 V" Out_Low_V="0 V" Out_Imped="40 Ω" Tpd_ps="10 ns" Tr_ps="3 ns" Tf_ps="4 ns" Logic_Symbol="true" />
+
+<item itemtype="Ground" CircId="Ground-20" mainComp="false" Show_id="false" Show_Val="false" Pos="-524,-20" rotation="0" hflip="1" vflip="1" label="Ground-20" idLabPos="-16,8" labelrot="0" valLabPos="-16,20" valLabRot="0" />
+
+<item itemtype="Rail" CircId="Rail-21" mainComp="false" ShowProp="Voltage" Show_id="false" Show_Val="true" Pos="-524,-60" rotation="450" hflip="1" vflip="1" label="Rail-21" idLabPos="-5,-10" labelrot="-90" valLabPos="-12,6" valLabRot="-90" Voltage="5 V" />
+
+<item itemtype="Push" CircId="Push-26" mainComp="false" Show_id="false" Show_Val="false" Pos="-120,-156" rotation="0" hflip="1" vflip="1" label="Push-26" idLabPos="-16,-24" labelrot="0" valLabPos="-16,20" valLabRot="0" Norm_Close="false" Poles="1" />
+
+<item itemtype="Ground" CircId="Ground-27" mainComp="false" Show_id="false" Show_Val="false" Pos="-92,-132" rotation="0" hflip="1" vflip="1" label="Ground-27" idLabPos="-16,8" labelrot="0" valLabPos="-16,20" valLabRot="0" />
+
+<item itemtype="Connector" uid="Connector-47" startpinid="Uno-2-2" endpinid="KY040-12-clk" pointList="-296,-164,-380,-164,-380,-168" />
+
+<item itemtype="Connector" uid="Connector-48" startpinid="KY040-12-dt" endpinid="Uno-2-3" pointList="-388,-168,-388,-156,-296,-156" />
+
+<item itemtype="Connector" uid="Connector-51" startpinid="Seven Segment-14-pin_a" endpinid="74HC595-16-Q0" pointList="-464,-92,-476,-92" />
+
+<item itemtype="Connector" uid="Connector-52" startpinid="74HC595-16-Q1" endpinid="Seven Segment-14-pin_b" pointList="-476,-84,-464,-84" />
+
+<item itemtype="Connector" uid="Connector-53" startpinid="Seven Segment-14-pin_c" endpinid="74HC595-16-Q2" pointList="-464,-76,-476,-76" />
+
+<item itemtype="Connector" uid="Connector-54" startpinid="Seven Segment-14-pin_d" endpinid="74HC595-16-Q3" pointList="-464,-68,-476,-68" />
+
+<item itemtype="Connector" uid="Connector-55" startpinid="74HC595-16-Q4" endpinid="Seven Segment-14-pin_e" pointList="-476,-60,-464,-60" />
+
+<item itemtype="Connector" uid="Connector-56" startpinid="Seven Segment-14-pin_f" endpinid="74HC595-16-Q5" pointList="-464,-52,-476,-52" />
+
+<item itemtype="Connector" uid="Connector-57" startpinid="74HC595-16-Q6" endpinid="Seven Segment-14-pin_g" pointList="-476,-44,-464,-44" />
+
+<item itemtype="Connector" uid="Connector-67" startpinid="Uno-2-4" endpinid="KY040-12-sw" pointList="-296,-148,-396,-148,-396,-168" />
+
+<item itemtype="Connector" uid="Connector-75" startpinid="Uno-2-5" endpinid="74HC595-16-DS" pointList="-296,-140,-536,-140,-536,-68,-524,-68" />
+
+<item itemtype="Connector" uid="Connector-76" startpinid="74HC595-16-STC" endpinid="Uno-2-6" pointList="-524,-92,-532,-92,-532,-132,-296,-132" />
+
+<item itemtype="Connector" uid="Connector-78" startpinid="Seven Segment-14-pin_commond" endpinid="Uno-2-8" pointList="-336,-36,-320,-36,-320,-108,-296,-108" />
+
+<item itemtype="Connector" uid="Connector-79" startpinid="Uno-2-9" endpinid="Seven Segment-14-pin_commonc" pointList="-296,-100,-316,-100,-316,-32,-368,-32,-368,-36" />
+
+<item itemtype="Connector" uid="Connector-80" startpinid="Seven Segment-14-pin_commonb" endpinid="Uno-2-10" pointList="-400,-36,-400,-28,-312,-28,-312,-92,-296,-92" />
+
+<item itemtype="Connector" uid="Connector-81" startpinid="Uno-2-11" endpinid="Seven Segment-14-pin_commona" pointList="-296,-84,-308,-84,-308,-24,-432,-24,-432,-36" />
+
+<item itemtype="Connector" uid="Connector-82" startpinid="74HC595-16-!OE" endpinid="Ground-20-Gnd" pointList="-524,-36,-524,-36" />
+
+<item itemtype="Connector" uid="Connector-83" startpinid="Rail-21-outnod" endpinid="74HC595-16-!MR" pointList="-524,-44,-524,-44" />
+
+<item itemtype="Connector" uid="Connector-77" startpinid="Uno-2-7" endpinid="74HC595-16-SHC" pointList="-296,-124,-528,-124,-528,-100,-524,-100" />
+
+<item itemtype="Connector" uid="Connector-94" startpinid="Seven Segment-14-pin_dot" endpinid="74HC595-16-Q7" pointList="-448,-36,-476,-36" />
+
+<item itemtype="Connector" uid="Connector-96" startpinid="Ground-27-Gnd" endpinid="Push-26-switch0pinN" pointList="-92,-148,-92,-156,-104,-156" />
+
+<item itemtype="Connector" uid="Connector-97" startpinid="Push-26-pinP0" endpinid="Uno-2-A2" pointList="-136,-156,-152,-156" />
+
+</circuit>
