@@ -7,90 +7,39 @@
 #define DATA_PIN_ PD5 // DATA
 #define LATCH_PIN PD6 // STC
 #define CLOCK_PIN PD7 // SHC
+/* Esta funcion me configura el adc*/
+void adc_init()
+{
+  // Configurar el prescaler a 128 (frecuencia ADC = 16 MHz / 128 = 125 kHz)
+  ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 
-#define boton1 (PINC >> PC2 & 1)
-uint8_t flag_bot1, e_a_b1;
-void anti_reb1(void)
-{
-  static uint8_t cont_bot1 = 0;
-  if (boton1 == 0)
-  {
-    if (cont_bot1 < 200)
-    {
-      cont_bot1++;
-    }
-  }
-  else
-  {
-    cont_bot1 = 0;
-  }
-  if (cont_bot1 > 50)
-  {
-    flag_bot1 = 1;
-    set_bit(PORTB, PB5);
-  }
-  else
-  {
-    clear_bit(PORTB, PB5);
-    flag_bot1 = 0;
-  }
-}
+  // Seleccionar la referencia de voltaje como AVcc (5V con capacitor en AREF)
+  ADMUX |= (1 << REFS0);
 
-/* Esta funcion decrementa un numero entre 0 y 20.00 en formato
-de reloj, envia este numero descompuesto a los 4 displays */
-uint16_t decrementar(uint16_t tiempo)
-{
-  uint8_t segundos;
-  uint8_t minutos;
-  segundos = tiempo % 100;
-  minutos = tiempo / 100;
-  if (segundos >= 1)
-  {
-    segundos--;
-  }
-  else
-  {
-    if (minutos >= 1)
-    {
-      minutos--;
-      segundos = 59;
-    }
-  }
-  return (minutos * 100) + segundos;
+  // Habilitar el ADC
+  ADCSRA |= (1 << ADEN);
 }
-/* Esta funcion recibe el angulo de un encoder para setear un tiempo en un display cuadruple,
- retorna el mismo angle para igualarlo y evitar usar punteros de mierda */
-int16_t reloja(int16_t angle)
+/*
+ * Esta funcion recibe un el canal de adc que quiero leer
+ * y me devuelve el valor en 10bits
+ */
+uint16_t adc_read(uint8_t channel)
 {
-  static uint8_t mins = 0;
-  if (mins < 20)
-  {
-    if (angle > 59)
-    {
-      mins++;
-      angle = 0;
-    }
-    if (angle < 0)
-    {
-      if (mins > 0)
-      {
-        angle = 59;
-        mins--;
-      }
-      else
-      {
-        angle = 59;
-        mins = 19;
-      }
-    }
-  }
-  else
-  {
-    mins = 0;
-    angle = 0;
-  }
-  descomponer((mins * 100) + angle);
-  return (mins * 100) + angle;
+  // Asegurarse de que el canal esté en el rango válido (0-7)
+  channel &= 0b00000111;
+
+  // Seleccionar el canal configurando los bits MUX
+  ADMUX = (ADMUX & 0xF8) | channel;
+
+  // Iniciar la conversión
+  ADCSRA |= (1 << ADSC);
+
+  // Esperar a que la conversión termine (ADSC se pone en 0)
+  while (ADCSRA & (1 << ADSC))
+    ;
+
+  // Retornar el valor convertido (10 bits)
+  return ADC;
 }
 /* Esta funcion recibe un  uint8_t y lo manda al registro 74hc595*/
 void send_reg(uint8_t data)
@@ -111,7 +60,7 @@ void send_reg(uint8_t data)
   PORTD &= ~(1 << LATCH_PIN); // Latch en bajo
 }
 /* Esta funcion recibe un que display quiero prender y que numero mandarle*/
-void Transistores(uint8_t display, uint8_t num)
+void Transistores(uint8_t display, uint8_t num, uint8_t punto)
 {
   static uint8_t farfadox[10] = {
       0b11111100, // 0'
@@ -132,27 +81,39 @@ void Transistores(uint8_t display, uint8_t num)
 
   if (display == 1)
   {
-    send_reg(farfadox[num]);
+    if (punto == 1)
+      send_reg(1 + farfadox[num]);
+    else
+      send_reg(farfadox[num]);
     clear_bit(PORTB, PB0);
   }
   if (display == 2)
   {
-    send_reg(farfadox[num]);
+    if (punto == 2)
+      send_reg(1 + farfadox[num]);
+    else
+      send_reg(farfadox[num]);
     clear_bit(PORTB, PB1);
   }
   if (display == 3)
   {
-    send_reg(1 + farfadox[num]);
+    if (punto == 3)
+      send_reg(1 + farfadox[num]);
+    else
+      send_reg(farfadox[num]);
     clear_bit(PORTB, PB2);
   }
   if (display == 4)
   {
-    send_reg(farfadox[num]);
+    if (punto == 4)
+      send_reg(1 + farfadox[num]);
+    else
+      send_reg(farfadox[num]);
     clear_bit(PORTB, PB3);
   }
 }
 /* Esta funcion recibe un numero descompuesto y los manda a el display*/
-void multiplexado(uint8_t uni, uint8_t dec, uint8_t cent, uint8_t mil)
+void multiplexado(uint8_t uni, uint8_t dec, uint8_t cent, uint8_t mil, uint8_t punto)
 {
   enum estados_posibles
   {
@@ -165,27 +126,27 @@ void multiplexado(uint8_t uni, uint8_t dec, uint8_t cent, uint8_t mil)
   switch (estado)
   {
   case unie:
-    Transistores(1, uni);
+    Transistores(1, uni, punto);
     estado = deces;
     break;
   case deces:
-    Transistores(2, dec);
+    Transistores(2, dec, punto);
     estado = cente;
     break;
   case cente:
-    Transistores(3, cent);
+    Transistores(3, cent, punto);
     set_bit(PORTC, PC4);
     estado = mile;
     break;
   case mile:
     clear_bit(PORTC, PC4);
-    Transistores(4, mil);
+    Transistores(4, mil, punto);
     estado = unie;
     break;
   }
 }
 /* Esta funcion manda el numnero que le mande a los displays*/
-void descomponer(uint16_t variable)
+void descomponer(uint16_t variable, uint8_t punto)
 {
   static uint8_t unidad;
   static uint8_t decena;
@@ -195,7 +156,7 @@ void descomponer(uint16_t variable)
   decena = (variable % 100) / 10;
   centena = (variable / 100) % 10;
   unimil = variable / 1000;
-  multiplexado(unidad, decena, centena, unimil);
+  multiplexado(unidad, decena, centena, unimil, punto);
 }
 /* Esta funcion configura las interrupciones para el encoder*/
 void initInterrupts(void)
@@ -230,4 +191,120 @@ void timer1(void)
   TCCR1C = 0;
   OCR1A = 249;
   TIMSK1 = (1 << OCIE1A);
+}
+
+uint8_t numeros[4] = {0x00, 0x30, 0x79, 0xFF};
+
+uint32_t total_ms = 0;
+uint32_t tiempoV1 = 0, tiempoV2 = 0; // Timers Multiplexado
+
+typedef enum parte
+{
+  miles,
+  cienes,
+  dieces,
+  unos
+} ParteNum_t;
+ParteNum_t parte_num = miles;
+void multiplexado_vumetro(uint8_t NumDisplay, uint8_t Dato)
+{
+  send_reg(numeros[Dato]);
+  switch (NumDisplay)
+  {
+  case 0:
+    PORTB &=~(1 << PB0);
+    PORTB |= (1 << PB1);
+    PORTB |= (1 << PB2);
+    PORTB |= (1 << PB3);
+    break;
+
+  case 1:
+    PORTB |= (1 << PB0);
+    PORTB &=~(1 << PB1);
+    PORTB |= (1 << PB2);
+    PORTB |= (1 << PB3);
+    break;
+  case 2:
+    PORTB |= (1 << PB0);
+    PORTB |= (1 << PB1);
+    PORTB &=~(1 << PB2);
+    PORTB |= (1 << PB3);
+    break;
+  case 3:
+    PORTB |= (1 << PB0);
+    PORTB |= (1 << PB1);
+    PORTB |= (1 << PB2);
+    PORTB &=~(1 << PB3);
+    break;
+  }
+}
+
+void val(uint8_t mil, uint8_t centena, uint8_t decena, uint8_t unidad)
+{
+  switch (parte_num)
+  {
+  case miles:
+    multiplexado_vumetro(0, mil);
+    parte_num = cienes;
+    break;
+  case cienes:
+    multiplexado_vumetro(1, centena);
+    parte_num = dieces;
+    break;
+  case dieces:
+    multiplexado_vumetro(2, decena);
+    parte_num = unos;
+    break;
+
+  case unos:
+    multiplexado_vumetro(3, unidad);
+    parte_num = miles;
+    break;
+  }
+}
+
+void valoresCadc(uint16_t valorAD)
+{
+  switch (valorAD / 79)
+  {
+  case 0:
+    val(0, 0, 0, 0);
+    break;
+  case 1:
+    val(1, 0, 0, 0);
+    break;
+  case 2:
+    val(2, 0, 0, 0);
+    break;
+  case 3:
+    val(3, 0, 0, 0);
+    break;
+  case 4:
+    val(3, 1, 0, 0);
+    break;
+  case 5:
+    val(3, 2, 0, 0);
+    break;
+  case 6:
+    val(3, 3, 0, 0);
+    break;
+  case 7:
+    val(3, 3, 1, 0);
+    break;
+  case 8:
+    val(3, 3, 2, 0);
+    break;
+  case 9:
+    val(3, 3, 3, 0);
+    break;
+  case 10:
+    val(3, 3, 3, 1);
+    break;
+  case 11:
+    val(3, 3, 3, 2);
+    break;
+  case 12:
+    val(3, 3, 3, 3);
+    break;
+  }
 }
