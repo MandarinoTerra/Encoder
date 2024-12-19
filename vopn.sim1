@@ -1,7 +1,7 @@
 <circuit version="1.1.0-SR0" rev="1917" stepSize="1000000" stepsPS="1000000" NLsteps="100000" reaStep="1000000" animate="1" >
 
 <item itemtype="Subcircuit" CircId="Uno-2" mainComp="false" Show_id="true" Show_Val="false" Pos="-304,-196" rotation="0" hflip="1" vflip="1" label="Arduino Uno-9" idLabPos="50,235" labelrot="0" valLabPos="0,0" valLabRot="0" Logic_Symbol="false">
-<mainCompProps MainCompId="mega328-109" Frequency="16 MHz" Program=".pio/build/uno/firmware.hex" Auto_Load="false" saveEepr="true" SerialMon="-1" />
+<mainCompProps MainCompId="mega328-109" Frequency="16 MHz" Program="../PC/.pio/build/uno/firmware.hex" Auto_Load="false" saveEepr="true" SerialMon="-1" />
 </item>
 
 <item itemtype="KY040" CircId="KY040-12" mainComp="false" Show_id="false" Show_Val="false" Pos="-384,-204" rotation="180" hflip="-1" vflip="-1" label="KY040-12" idLabPos="-34,20" labelrot="-90" valLabPos="-16,20" valLabRot="0" Steps="20" />
@@ -15,6 +15,8 @@
 <item itemtype="Rail" CircId="Rail-21" mainComp="false" ShowProp="Voltage" Show_id="false" Show_Val="true" Pos="-524,-60" rotation="450" hflip="1" vflip="1" label="Rail-21" idLabPos="-5,-10" labelrot="-90" valLabPos="-12,6" valLabRot="-90" Voltage="5 V" />
 
 <item itemtype="Potentiometer" CircId="Potentiometer-29" mainComp="false" ShowProp="Resistance" Show_id="false" Show_Val="true" Pos="-120,-140" rotation="90" hflip="1" vflip="1" label="Potentiometer-29" idLabPos="-16,-40" labelrot="0" valLabPos="15,-20" valLabRot="0" Resistance="1 MΩ" Value_Ohm="598000 Ω" Slider="false" Scale="1" />
+
+<item itemtype="SerialPort" CircId="SerialPort-30" mainComp="false" Show_id="true" Show_Val="false" Pos="-260,-216" rotation="0" hflip="1" vflip="1" label="SerialPort-30" idLabPos="-20,-32" labelrot="0" valLabPos="-16,20" valLabRot="0" Auto="true" Port="/dev/ttyS3" Baudrate="9600 _Bd" DataBits="8 _bits" StopBits="1 _bits" SerialMon="false" />
 
 <item itemtype="Connector" uid="Connector-47" startpinid="Uno-2-2" endpinid="KY040-12-clk" pointList="-296,-164,-380,-164,-380,-168" />
 
@@ -61,5 +63,9 @@
 <item itemtype="Connector" uid="Connector-101" startpinid="Potentiometer-29-PinB" endpinid="Uno-2-Vin" pointList="-120,-124,-152,-124" />
 
 <item itemtype="Connector" uid="Connector-102" startpinid="Potentiometer-29-PinA" endpinid="Uno-2-GND1" pointList="-120,-156,-88,-156,-88,-108,-152,-108" />
+
+<item itemtype="Connector" uid="Connector-103" startpinid="SerialPort-30-pin1" endpinid="Uno-2-1" pointList="-300,-208,-312,-208,-312,-172,-296,-172" />
+
+<item itemtype="Connector" uid="Connector-104" startpinid="Uno-2-0" endpinid="SerialPort-30-pin0" pointList="-296,-180,-304,-180,-304,-224,-300,-224" />
 
 </circuit>

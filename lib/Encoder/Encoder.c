@@ -1,12 +1,59 @@
 #include <Encoder.h>
 #include <Arduino.h>
+#include <avr/eeprom.h> //Necesario para poder utilizar las funciones del compilador en el uso de la EEPROM interna
+#ifndef BAUD            /* si no esta definido en el MAkefile... */
+#define BAUD 9600       /* define un valor seguro de baudrate */
+#endif
 
+#include <util/setbaud.h>
+
+
+volatile uint8_t caracterRX;
+volatile uint8_t caracterTX;
+
+void initUSART(void)
+{
+  /* Requiere definir BAUD que es la velocidad de carcateres por segundo aprox. */
+  UBRR0H = UBRRH_VALUE; /* definido en setbaud.h */
+  UBRR0L = UBRRL_VALUE;
+
+#if USE_2X // Seteos especiales de la USART --** Ver hoja de datos **--
+  UCSR0A |= (1 << U2X0);
+#else
+  UCSR0A &= ~(1 << U2X0);
+#endif
+  /*
+   *
+   * Habilita la transmision y recepcion de la USART
+   *
+   */
+  UCSR0B = (1 << TXEN0) | (1 << RXEN0) | (1 << RXCIE0); // habilito RX, TX e interupciones al recibir
+  UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);               /* 8 data bits, 1 stop bit */
+}
 #define set_bit(reg, bit) reg |= (1 << bit)
 #define clear_bit(reg, bit) reg &= ~(1 << bit)
 
 #define DATA_PIN_ PD5 // DATA
 #define LATCH_PIN PD6 // STC
 #define CLOCK_PIN PD7 // SHC
+
+void USART_TXInt(uint8_t Buffer)
+{
+  caracterTX = Buffer;
+  UCSR0B |= (1 << UDRIE0); // habilito la interrupcion al transmitir
+}
+/* printf */
+void print(char *buff)
+{
+
+  size_t i = 0;
+  while (buff[i] != 0)
+  {
+    USART_TXInt(buff[i]);
+    i++;
+    _delay_ms(2);
+  }
+}
 /* Esta funcion me configura el adc*/
 void adc_init()
 {
