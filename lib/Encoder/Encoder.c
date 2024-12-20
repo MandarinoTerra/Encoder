@@ -29,6 +29,8 @@ void initUSART(void)
    */
   UCSR0B = (1 << TXEN0) | (1 << RXEN0) | (1 << RXCIE0); // habilito RX, TX e interupciones al recibir
   UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);               /* 8 data bits, 1 stop bit */
+  UCSR0B |= (1 << UDRIE0); // habilito la interrupcion al transmitir
+  
 }
 #define set_bit(reg, bit) reg |= (1 << bit)
 #define clear_bit(reg, bit) reg &= ~(1 << bit)
@@ -45,7 +47,6 @@ void USART_TXInt(uint8_t Buffer)
 /* printf */
 void print(char *buff)
 {
-
   size_t i = 0;
   while (buff[i] != 0)
   {

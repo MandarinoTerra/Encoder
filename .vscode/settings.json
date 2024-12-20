@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "arduino.h": "c"
+        "arduino.h": "c",
+        "encoder.c": "cpp"
     },
     "editor.cursorStyle": "underline"
 }
